@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="az">
+<head>
+    <meta charset="UTF-8">
+    <title>Memi Qəbələ</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        body { font-family: sans-serif; text-align: center; padding: 20px; }
+        .product-card { border: 2px solid #333; padding: 20px; margin: 15px; border-radius: 10px; display: inline-block; width: 200px; }
+        .order-btn { background: #28a745; color: white; border: none; padding: 10px; cursor: pointer; width: 100%; border-radius: 5px; }
+    </style>
+</head>
+<body>
+    <h1>Məhsullarımız</h1>
+    <div id="shop-products">Yüklənir...</div>
+
+    <script>
+        const supabase = supabase.createClient(
+            "https://oyksujitcoofwfxberba.supabase.co", 
+            "sb_publishable_6QmenthNgP3cyVAt6CbJBQ_zsca6iLw"
+        );
+
+        async function load() {
+            const grid = document.getElementById('shop-products');
+            const { data, error } = await supabase.from('products').select('*');
+            
+            if (error) { grid.innerHTML = "Xəta: " + error.message; return; }
+            
+            grid.innerHTML = data.length === 0 ? "Məhsul yoxdur" : data.map(p => `
+                <div class="product-card">
+                    <h3>${p.title_az || 'Adsız'}</h3>
+                    <p>${p.price || 0} ₼</p>
+                    <button class="order-btn" onclick="order('${p.title_az}')">Sifariş Et</button>
+                </div>
+            `).join('');
+        }
+
+        async function order(name) {
+            const n = prompt("Adınız:");
+            const p = prompt("Nömrəniz:");
+            if (n && p) {
+                await supabase.from('orders').insert([{ customer_name: n, product_name: name, phone_number: p, status: 'yeni' }]);
+                alert("Sifarişiniz qəbul olundu!");
+            }
+        }
+        load();
+    </script>
+</body>
+</html>
