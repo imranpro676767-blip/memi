@@ -46,9 +46,6 @@
         </div>
     </div>
 
-    <button onclick="loadOrders()" style="background: green; color: white;">Sifarişləri Yoxla</button>
-<div id="orders-list" style="margin-top: 20px;"></div>
-
     <script>
         const SUPABASE_URL = "https://oyksujitcoofwfxberba.supabase.co"; 
         const SUPABASE_KEY = "sb_publishable_6QmenthNgP3cyVAt6CbJBQ_zsca6iLw";
@@ -84,35 +81,6 @@
         }
 
         async function addNewProduct() {
-            async function loadOrders() {
-    const ordersList = document.getElementById('orders-list');
-    const { data, error } = await supabase.from('orders').select('*').order('created_at', { ascending: false });
-    
-    if (error) {
-        alert("Xəta baş verdi: " + error.message);
-        return;
-    }
-    
-    ordersList.innerHTML = "<h3>Sifarişlər:</h3>";
-    data.forEach(order => {
-        ordersList.innerHTML += `
-            <div style="background: #f1f5f9; padding: 10px; margin-bottom: 10px; border-radius: 8px;">
-                <p><strong>${order.customer_name}</strong> - ${order.product_name}</p>
-                <p>Nömrə: ${order.phone_number}</p>
-                <p>Status: ${order.status}</p>
-                <button onclick="updateStatus('${order.id}', 'tamamlandı')" style="background: blue; color: white;">Tamamlandı et</button>
-            </div>
-        `;
-    });
-}
-
-async function updateStatus(id, newStatus) {
-    const { error } = await supabase.from('orders').update({ status: newStatus }).eq('id', id);
-    if (!error) {
-        alert("Status yeniləndi!");
-        loadOrders();
-    }
-}
             const title = document.getElementById('p-title').value;
             const price = document.getElementById('p-price').value;
             await supabase.from('products').insert([{ title_az: title, price: price }]);
