@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="az">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Memi Qəbələ</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        .product-card { border: 1px solid #ccc; padding: 15px; margin: 10px; border-radius: 10px; width: 200px; display: inline-block; vertical-align: top; }
+        .order-btn { background: red; color: white; border: none; padding: 10px; cursor: pointer; width: 100%; border-radius: 5px; }
+    </style>
+</head>
+<body>
+
+    <h1>Mağaza</h1>
+    <div id="shop-products">Məhsullar yüklənir...</div>
+
+    <script>
+        const supabase = supabase.createClient(
+            "https://oyksujitcoofwfxberba.supabase.co", 
+            "sb_publishable_6QmenthNgP3cyVAt6CbJBQ_zsca6iLw"
+        );
+
+        async function loadProducts() {
+            const grid = document.getElementById('shop-products');
+            const { data, error } = await supabase.from('products').select('*');
+            
+            if (error) {
+                grid.innerHTML = "Xəta: " + error.message;
+                return;
+            }
+
+            if (!data || data.length === 0) {
+                grid.innerHTML = "Hələlik məhsul yoxdur.";
+                return;
+            }
+
+            grid.innerHTML = ''; 
+            data.forEach(p => {
+                const title = p.title_az || p.title || 'Adsız';
+                const price = p.price || 0;
+                grid.innerHTML += `
+                    <div class="product-card">
+                        <h3>${title}</h3>
+                        <p>${price} ₼</p>
+                        <button class="order-btn" onclick="orderProduct('${title}')">Sifariş Et</button>
+                    </div>
+                `;
+            });
+        }
+
+        async function orderProduct(pName) {
+            const user = prompt("Adınız:");
+            const phone = prompt("Nömrəniz:");
+            if (user && phone) {
+                const { error } = await supabase.from('orders').insert([
+                    { customer_name: user, product_name: pName, phone_number: phone, status: 'yeni' }
+                ]);
+                
+                if (error) {
+                    alert("Xəta: " + error.message);
+                } else {
+                    alert("Sifarişiniz qəbul olundu!");
+                }
+            }
+        }
+
+        loadProducts();
+    </script>
+</body>
+</html>
