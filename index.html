@@ -2,19 +2,19 @@
 <html lang="az">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Memi Qəbələ</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
-        body { font-family: sans-serif; padding: 20px; }
-        .product-card { border: 1px solid #ccc; padding: 15px; margin: 10px; border-radius: 10px; width: 200px; display: inline-block; vertical-align: top; }
-        .order-btn { background: red; color: white; border: none; padding: 10px; cursor: pointer; width: 100%; border-radius: 5px; margin-top: 10px; }
+        /* Sadə dizayn */
+        .container { display: flex; flex-wrap: wrap; justify-content: center; padding: 20px; }
+        .product-card { border: 1px solid #ddd; padding: 15px; margin: 10px; border-radius: 10px; width: 200px; text-align: center; }
+        .order-btn { background: #000; color: #fff; border: none; padding: 10px; cursor: pointer; width: 100%; border-radius: 5px; }
     </style>
 </head>
 <body>
 
-    <h1>Mağaza</h1>
-    <div id="shop-products">Bazaya qoşulur...</div>
+    <h1 style="text-align:center;">Memi Qəbələ Məhsulları</h1>
+    <div id="shop-products" class="container">Yüklənir...</div>
 
     <script>
         const supabase = supabase.createClient(
@@ -26,38 +26,26 @@
             const grid = document.getElementById('shop-products');
             const { data, error } = await supabase.from('products').select('*');
             
-            if (error) {
-                grid.innerHTML = "Xəta: " + error.message;
-                console.error(error);
-                return;
-            }
+            if (error) { grid.innerHTML = "Xəta: " + error.message; return; }
             
-            grid.innerHTML = "";
-            if (!data || data.length === 0) {
-                grid.innerHTML = "Məhsul tapılmadı.";
-            } else {
-                data.forEach(p => {
-                    grid.innerHTML += `
-                        <div class="product-card">
-                            <h3>${p.title_az || 'Adsız'}</h3>
-                            <p>${p.price || 0} ₼</p>
-                            <button class="order-btn" onclick="orderProduct('${p.title_az}')">Sifariş Et</button>
-                        </div>`;
-                });
-            }
+            grid.innerHTML = data.map(p => `
+                <div class="product-card">
+                    <h3>${p.title_az || 'Adsız'}</h3>
+                    <p>${p.price || 0} ₼</p>
+                    <button class="order-btn" onclick="orderProduct('${p.title_az}')">Sifariş Et</button>
+                </div>
+            `).join('');
         }
 
         async function orderProduct(name) {
-            const user = prompt("Adınız:");
-            const phone = prompt("Nömrəniz:");
-            if (user && phone) {
-                const { error } = await supabase.from('orders').insert([
-                    { customer_name: user, product_name: name, phone_number: phone, status: 'yeni' }
-                ]);
-                alert(error ? "Xəta: " + error.message : "Sifarişiniz qəbul olundu!");
+            const n = prompt("Adınız:");
+            const p = prompt("Nömrəniz:");
+            if (n && p) {
+                await supabase.from('orders').insert([{ customer_name: n, product_name: name, phone_number: p, status: 'yeni' }]);
+                alert("Sifarişiniz qəbul olundu!");
             }
         }
-        
+
         loadProducts();
     </script>
 </body>
